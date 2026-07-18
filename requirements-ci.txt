@@ -1,6 +1,6 @@
 fastapi>=0.115,<1.0
 python-multipart>=0.0.12
-opencv-python-headless>=4.10,<5.0
+opencv-python-headless>=4.10,<6.0
 numpy>=1.26,<3.0
 imageio-ffmpeg>=0.5
 pywebview>=6.0,<7.0
