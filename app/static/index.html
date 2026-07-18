@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="在本地用 AI 从视频中提取深度图">
+    <title>Depth Lab · 视频深度提取</title>
+    <link rel="stylesheet" href="/static/styles.css">
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Depth Lab 首页">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <span class="brand-copy">
+          <strong>DEPTH LAB</strong>
+          <small>Monocular Video Studio</small>
+        </span>
+      </a>
+      <div class="system-badge" id="systemBadge">
+        <i></i>
+        <span>正在检测算力…</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <p class="eyebrow"><span>01</span> VIDEO → SPATIAL DEPTH</p>
+        <h1>让每一帧，<br><em>拥有空间。</em></h1>
+        <p class="hero-copy">上传视频，AI 会解析画面的远近关系，生成平滑、可用的深度视频。全部在你的电脑上完成。</p>
+        <div class="hero-metrics">
+          <div><strong>100%</strong><span>本地处理</span></div>
+          <div><strong>OFFLINE</strong><span>内置引擎</span></div>
+          <div><strong>5</strong><span>视觉色板</span></div>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="深度提取工作区">
+        <form id="depthForm">
+          <div class="panel upload-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="step-number">01</span>
+                <div><h2>输入视频</h2><p>MP4 / MOV / AVI / WebM / MKV</p></div>
+              </div>
+              <button class="text-button hidden" id="replaceButton" type="button">更换视频</button>
+            </div>
+
+            <!-- [html-validate-disable-next prefer-native-element] -->
+            <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="选择或拖入视频">
+              <input id="videoInput" name="video" type="file" accept="video/mp4,video/quicktime,video/x-msvideo,video/webm,video/x-matroska,.m4v">
+              <div class="drop-empty" id="dropEmpty">
+                <div class="upload-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" /></svg>
+                </div>
+                <strong>把视频拖到这里</strong>
+                <span>或点击浏览本地文件</span>
+              </div>
+              <div class="video-selected hidden" id="videoSelected">
+                <video id="sourcePreview" muted playsinline></video>
+                <div class="video-overlay">
+                  <span class="file-pill" id="fileType">MP4</span>
+                  <div><strong id="fileName">video.mp4</strong><span id="fileMeta">读取中…</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel controls-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="step-number">02</span>
+                <div><h2>提取参数</h2><p>按用途选择质量与效果</p></div>
+              </div>
+            </div>
+
+            <div class="control-section">
+              <div class="control-label"><label>Depth 引擎</label><span>已内置 · 完全离线</span></div>
+              <input type="hidden" name="model" value="small">
+              <div class="engine-card">
+                <span class="engine-icon"><i></i><i></i><i></i></span>
+                <div><strong>Depth Anything V2 · Small</strong><small>AI 引擎已经内置，安装后可直接离线使用</small></div>
+                <b>READY</b>
+              </div>
+            </div>
+
+            <div class="control-grid">
+              <div class="field">
+                <label for="mode">输出模式</label>
+                <div class="select-wrap"><select id="mode" name="mode"><option value="depth">纯深度图</option><option value="blend">原片叠加</option><option value="side-by-side">左右对比</option></select></div>
+              </div>
+              <div class="field">
+                <label for="palette">深度色板</label>
+                <div class="select-wrap"><select id="palette" name="palette"><option value="turbo">Turbo 彩虹</option><option value="gray">灰度</option><option value="inferno">Inferno 热力</option><option value="viridis">Viridis</option><option value="magma">Magma</option></select></div>
+              </div>
+              <div class="field">
+                <label for="maxSide">输出尺寸</label>
+                <div class="select-wrap"><select id="maxSide" name="max_side"><option value="512" selected>最长边 512 · 流畅</option><option value="768">最长边 768 · 清晰</option><option value="1024">最长边 1024 · 精细</option><option value="0">保持原始尺寸</option></select></div>
+              </div>
+              <div class="field">
+                <label for="outputFps">输出帧率</label>
+                <div class="select-wrap"><select id="outputFps" name="output_fps"><option value="12" selected>12 FPS · 流畅</option><option value="24">24 FPS · 清晰</option><option value="30">30 FPS · 较慢</option><option value="0">跟随原视频 · 最慢</option></select></div>
+              </div>
+            </div>
+
+            <div class="slider-field">
+              <div class="control-label"><label for="smoothing">跨帧稳定</label><span id="smoothValue">82%</span></div>
+              <input id="smoothing" name="smoothing" type="range" min="0" max="98" value="82">
+              <div class="range-labels"><span>响应更快</span><span>画面更稳</span></div>
+            </div>
+
+            <div class="switch-row">
+              <label class="switch-item">
+                <span><strong>保留原始音轨</strong><small>将音频合并到输出 MP4</small></span>
+                <input type="checkbox" id="keepAudio" checked><i></i>
+              </label>
+              <label class="switch-item">
+                <span><strong>反转深度</strong><small>切换近处/远处亮度</small></span>
+                <input type="checkbox" id="invert"><i></i>
+              </label>
+            </div>
+
+            <button class="primary-button" id="submitButton" type="submit" disabled>
+              <span>开始提取 Depth</span>
+              <svg viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5" /></svg>
+            </button>
+            <p class="local-note"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.6 2.8 8.8 7 10 4.2-1.2 7-5.4 7-10V6l-7-3Z" /></svg>视频不会上传到云端，处理文件保存在本机 data/jobs 目录</p>
+          </div>
+        </form>
+
+        <section class="panel progress-panel hidden" id="progressPanel" aria-live="polite">
+          <div class="progress-top">
+            <div class="depth-orb"><span></span><span></span><span></span></div>
+            <div class="progress-copy"><p id="progressKicker">DEPTH ENGINE RUNNING</p><h2 id="progressMessage">正在准备 AI 引擎</h2><span id="progressFrames">准备中…</span></div>
+            <strong id="progressPercent">0%</strong>
+          </div>
+          <div class="progress-track"><i id="progressBar"></i></div>
+          <div class="progress-bottom"><span>AI 引擎正在启动，处理全程离线。</span><button class="text-button danger" id="cancelButton" type="button">取消任务</button></div>
+        </section>
+
+        <section class="panel result-panel hidden" id="resultPanel">
+          <div class="result-heading">
+            <div><span class="success-icon">✓</span><div><p>PROCESS COMPLETE</p><h2>深度视频已生成</h2></div></div>
+            <button class="secondary-button" id="newTaskButton" type="button">处理新视频</button>
+          </div>
+          <div class="result-video-wrap"><video id="resultVideo" controls playsinline></video><span class="result-label">DEPTH OUTPUT</span></div>
+          <div class="result-footer">
+            <div class="result-stats" id="resultStats"></div>
+            <a class="primary-button download-button" id="downloadButton" href="#"><span>保存 MP4</span><svg viewBox="0 0 24 24"><path d="M12 4v11m0 0 4-4m-4 4-4-4M5 19h14" /></svg></a>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer><span>DEPTH LAB / V1.0.2 · 流畅模式</span><span>Powered by Depth Anything V2</span></footer>
+    <div class="toast hidden" id="toast" role="alert"></div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

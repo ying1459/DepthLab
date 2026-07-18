@@ -1,0 +1,42 @@
+name: Bug report
+description: Report a reproducible Depth Lab problem
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting a problem. Do not upload private videos unless you intend to share them publicly.
+  - type: input
+    id: version
+    attributes:
+      label: Depth Lab version
+      placeholder: e.g. 1.0.2
+    validations:
+      required: true
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      options:
+        - Windows installer
+        - Windows portable
+        - Source checkout
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include the steps, expected result, and actual result.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Windows version, CPU/GPU, input duration/resolution, and selected settings.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      render: shell
