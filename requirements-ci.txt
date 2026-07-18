@@ -3,5 +3,6 @@ python-multipart>=0.0.12
 opencv-python-headless>=4.10,<5.0
 numpy>=1.26,<3.0
 imageio-ffmpeg>=0.5
+pywebview>=6.0,<7.0
 httpx>=0.27
 pytest>=8.0
